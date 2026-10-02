@@ -1,0 +1,9 @@
+services:
+  baitap00:
+    build: .                  # Tự động tìm Dockerfile ở thư mục hiện tại để build
+    container_name: baitap00-container  # Tên container hiển thị (bạn có thể đổi tên này tùy ý)
+    ports:
+      - "3000:3000"           # Ánh xách cổng (Máy thật : Container)
+    environment:
+      - PORT=3000             # Khai báo biến môi trường cho Node.js app
+    restart: always           # Tự khởi động lại nếu ứng dụng bị crash
