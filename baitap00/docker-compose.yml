@@ -1,9 +1,30 @@
 services:
-  baitap00:
-    build: .                  # Tự động tìm Dockerfile ở thư mục hiện tại để build
-    container_name: baitap00-container  # Tên container hiển thị (bạn có thể đổi tên này tùy ý)
+  # 1. Service Database (Bắt buộc phải đặt tên service là mongodb)
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb-container
     ports:
-      - "3000:3000"           # Ánh xách cổng (Máy thật : Container)
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+  # 2. Service Node.js App
+  baitap00:
+    build: .
+    container_name: baitap00-container
+    ports:
+      - "3000:3000"
+    command: npm run dev
+    volumes: 
+      - .:/app
+      - /app/node_modules
     environment:
-      - PORT=3000             # Khai báo biến môi trường cho Node.js app
-    restart: always           # Tự khởi động lại nếu ứng dụng bị crash
+      - PORT=3000
+      - MONGO_URI=mongodb://mongodb:27017/gs25_db
+    depends_on:
+      - mongodb
+    restart: always
+
+volumes:
+  mongo-data:

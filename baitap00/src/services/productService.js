@@ -1,33 +1,30 @@
-// Dữ liệu giả (thay cho database)
-let products = [
-  { id: 1, name: 'Sữa tươi', price: 12000 },
-  { id: 2, name: 'Bánh mì', price: 8000 },
-  { id: 3, name: 'Nước suối', price: 5000 },
-];
+const Product = require('../models/productModel');
 
-// Lấy tất cả sản phẩm
-const getAllProducts = () => {
-  return products;
-};
+class ProductService {
+  // Lấy tất cả sản phẩm
+  async getAllProducts() {
+    return await Product.find();
+  }
 
-// Lấy 1 sản phẩm theo id
-const getProductById = (id) => {
-  return products.find((p) => p.id === id);
-};
+  // Lấy sản phẩm theo ID
+  async getProductById(id) {
+    return await Product.findById(id);
+  }
 
-// Thêm sản phẩm mới
-const createProduct = (data) => {
-  const newProduct = {
-    id: products.length + 1,
-    name: data.name,
-    price: data.price,
-  };
-  products.push(newProduct);
-  return newProduct;
-};
+  // Tạo sản phẩm mới
+  async createProduct(productData) {
+    return await Product.create(productData);
+  }
 
-module.exports = {
-  getAllProducts,
-  getProductById,
-  createProduct,
-};
+  // Cập nhật sản phẩm
+  async updateProduct(id, productData) {
+    return await Product.findByIdAndUpdate(id, productData, { new: true });
+  }
+
+  // Xóa sản phẩm
+  async deleteProduct(id) {
+    return await Product.findByIdAndDelete(id);
+  }
+}
+
+module.exports = new ProductService();

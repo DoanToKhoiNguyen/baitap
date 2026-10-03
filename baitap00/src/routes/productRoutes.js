@@ -11,4 +11,10 @@ router.get('/:id', productController.getProductById);
 // POST /api/products      -> thêm sản phẩm mới
 router.post('/', productController.createProduct);
 
+// DELETE api/products
+router.delete('/:id', productController.deleteProduct);
+
+// PUT /api/products
+router.put('/:id', productController.updateProduct);
+
 module.exports = router;

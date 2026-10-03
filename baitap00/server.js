@@ -1,17 +1,19 @@
-require('dotenv').config();
 const express = require('express');
+const connectDB = require('./src/config/db');
 const productRoutes = require('./src/routes/productRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// Middleware: cho phép Express đọc JSON trong req.body
+// Middleware đọc body JSON
 app.use(express.json());
 
-// Gắn các nhóm route vào server
+// Kết nối Cơ sở dữ liệu MongoDB
+connectDB();
+
+// Routes
 app.use('/api/products', productRoutes);
 
-// Bật server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server chạy ở cổng ${PORT}`);
-});
+  console.log(`🚀 Server listening on port ${PORT}`);
+}); 
