@@ -1,6 +1,7 @@
 const express = require('express');
 const connectDB = require('./src/config/db');
 const productRoutes = require('./src/routes/productRoutes');
+const authRoutes = require('./src/routes/authRoutes');
 
 const app = express();
 
@@ -12,6 +13,7 @@ connectDB();
 
 // Routes
 app.use('/api/products', productRoutes);
+app.use('/api/auth', authRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

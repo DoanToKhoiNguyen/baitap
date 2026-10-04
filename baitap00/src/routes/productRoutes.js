@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const productController = require('../controllers/productController');
+const { protect, authorizeAdmin } = require('../middlewares/authMiddleware');
+const validate = require('../middlewares/validateMiddleware');
+const {
+  createProductSchema,
+  updateProductSchema,
+} = require('../validations/productValidation');
 
-// GET /api/products       -> lấy tất cả sản phẩm
+// Public Routes (Xem danh sách & chi tiết)
 router.get('/', productController.getAllProducts);
-
-// GET /api/products/:id   -> lấy 1 sản phẩm theo id
 router.get('/:id', productController.getProductById);
 
-// POST /api/products      -> thêm sản phẩm mới
-router.post('/', productController.createProduct);
-
-// DELETE api/products
-router.delete('/:id', productController.deleteProduct);
-
-// PUT /api/products
-router.put('/:id', productController.updateProduct);
+// Protected Routes (Cần Token & Quản lý)
+router.post('/', protect, authorizeAdmin, validate(createProductSchema), productController.createProduct);
+router.put('/:id', protect, authorizeAdmin, validate(updateProductSchema), productController.updateProduct);
+router.delete('/:id', protect, authorizeAdmin, productController.deleteProduct);
 
 module.exports = router;

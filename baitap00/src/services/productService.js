@@ -1,30 +1,92 @@
 const Product = require('../models/productModel');
 
-class ProductService {
-  // Lấy tất cả sản phẩm
-  async getAllProducts() {
-    return await Product.find();
+const getAllProducts = async (queryParams = {}) => {
+  const page = Math.max(1, parseInt(queryParams.page) || 1);
+  const limit = Math.max(1, parseInt(queryParams.limit) || 10);
+  const skip = (page - 1) * limit;
+
+  const { search, category, minPrice, maxPrice, sortBy } = queryParams;
+
+  let filter = {};
+
+  // Tìm kiếm tương đối theo tên
+  if (search) {
+    filter.name = { $regex: search, $options: 'i' };
   }
 
-  // Lấy sản phẩm theo ID
-  async getProductById(id) {
-    return await Product.findById(id);
+  // Lọc theo danh mục
+  if (category) {
+    filter.category = category;
   }
 
-  // Tạo sản phẩm mới
-  async createProduct(productData) {
-    return await Product.create(productData);
+  // Lọc theo khoảng giá
+  if (minPrice || maxPrice) {
+    filter.price = {};
+    if (minPrice) filter.price.$gte = Number(minPrice);
+    if (maxPrice) filter.price.$lte = Number(maxPrice);
   }
 
-  // Cập nhật sản phẩm
-  async updateProduct(id, productData) {
-    return await Product.findByIdAndUpdate(id, productData, { new: true });
+  // Sắp xếp
+  let sortOption = { createdAt: -1 };
+  if (sortBy === 'price_asc') {
+    sortOption = { price: 1 };
+  } else if (sortBy === 'price_desc') {
+    sortOption = { price: -1 };
+  } else if (sortBy === 'oldest') {
+    sortOption = { createdAt: 1 };
   }
 
-  // Xóa sản phẩm
-  async deleteProduct(id) {
-    return await Product.findByIdAndDelete(id);
-  }
-}
+  // Thực thi query
+  const products = await Product.find(filter)
+    .sort(sortOption)
+    .skip(skip)
+    .limit(limit);
 
-module.exports = new ProductService();
+  const totalProducts = await Product.countDocuments(filter);
+  const totalPages = Math.ceil(totalProducts / limit) || 1;
+
+  return {
+    products,
+    pagination: {
+      totalProducts,
+      totalPages,
+      currentPage: page,
+      limit,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1,
+    },
+  };
+};
+
+const getProductById = async (id) => {
+  const product = await Product.findById(id);
+  if (!product) throw new Error('Không tìm thấy sản phẩm!');
+  return product;
+};
+
+const createProduct = async (productData) => {
+  return await Product.create(productData);
+};
+
+const updateProduct = async (id, updateData) => {
+  const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
+  if (!updatedProduct) throw new Error('Không tìm thấy sản phẩm để cập nhật!');
+  return updatedProduct;
+};
+
+const deleteProduct = async (id) => {
+  const deletedProduct = await Product.findByIdAndDelete(id);
+  if (!deletedProduct) throw new Error('Không tìm thấy sản phẩm để xóa!');
+  return deletedProduct;
+};
+
+module.exports = {
+  getAllProducts,
+  getProductById,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+};
